@@ -267,11 +267,11 @@ public class ChestListener implements Listener {
             Integer leftProfile = leftContainer.get(key, PersistentDataType.INTEGER);
             Integer rightProfile = rightContainer.get(key, PersistentDataType.INTEGER);
 
-            if(leftProfile != profile.get().getProfileId()){
+            if(leftProfile == null || leftProfile != profile.get().getProfileId()){
                 leftContainer.set(key, PersistentDataType.INTEGER, profile.get().getProfileId());
                 leftState.update();
             }
-            if(rightProfile != profile.get().getProfileId()){
+            if(rightProfile == null || rightProfile != profile.get().getProfileId()){
                 rightContainer.set(key, PersistentDataType.INTEGER, profile.get().getProfileId());
                 rightState.update();
             }
