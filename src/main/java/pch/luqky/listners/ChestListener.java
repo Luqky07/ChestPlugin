@@ -208,6 +208,15 @@ public class ChestListener implements Listener {
                 item.setItemMeta(meta);
                 inv.addItem(item);
             }
+            ItemStack openIntem = new ItemStack(Material.PAPER);
+            ItemMeta openMeta = openIntem.getItemMeta();
+            openMeta.displayName(Component.text("Free").color(NamedTextColor.AQUA));
+            if(profile.getProfileId() == 0){
+                openMeta.addEnchant(Enchantment.LURE, 1, true);
+                openMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            }
+            openIntem.setItemMeta(openMeta);
+            inv.addItem(openIntem);
 
             player.openInventory(inv);
             event.setCancelled(true);
@@ -238,14 +247,18 @@ public class ChestListener implements Listener {
         event.setCancelled(true);
 
         //Get player secure profile whit the name of the clicked item
-        Optional<SecureProfile> profile = plugin.getProfiles().stream()
+        Optional<SecureProfile> searchProfile = plugin.getProfiles().stream()
                     .filter(p -> p.getOwnerName().equalsIgnoreCase(player.getName()) && p.getName().equalsIgnoreCase(name))
                     .findFirst();
         //If profile doesn't exist, send message and return
-        if(profile.isEmpty()) {
+        if(!searchProfile.isPresent() && !name.equalsIgnoreCase("Free")) {
             player.sendMessage(ChatColor.RED + "This profile does not exist");
             return;
         }
+
+        SecureProfile profile = name.equalsIgnoreCase("Free") ? 
+            new SecureProfile(0, "", "", false, null)
+            : searchProfile.get();
 
         //Namespace key to manage profile in PersistentDataContainer
         NamespacedKey key = new NamespacedKey(plugin, "profile");
@@ -267,12 +280,12 @@ public class ChestListener implements Listener {
             Integer leftProfile = leftContainer.get(key, PersistentDataType.INTEGER);
             Integer rightProfile = rightContainer.get(key, PersistentDataType.INTEGER);
 
-            if(leftProfile == null || leftProfile != profile.get().getProfileId()){
-                leftContainer.set(key, PersistentDataType.INTEGER, profile.get().getProfileId());
+            if(leftProfile == null || leftProfile != profile.getProfileId()){
+                leftContainer.set(key, PersistentDataType.INTEGER, profile.getProfileId());
                 leftState.update();
             }
-            if(rightProfile == null || rightProfile != profile.get().getProfileId()){
-                rightContainer.set(key, PersistentDataType.INTEGER, profile.get().getProfileId());
+            if(rightProfile == null || rightProfile != profile.getProfileId()){
+                rightContainer.set(key, PersistentDataType.INTEGER, profile.getProfileId());
                 rightState.update();
             }
 
@@ -284,7 +297,7 @@ public class ChestListener implements Listener {
         //If holder is a single chest or tile, change profileId on single chest
         if(holder instanceof ChestInvetoryHolder state){
             PersistentDataContainer container = state.getTileState().getPersistentDataContainer();
-                container.set(key, PersistentDataType.INTEGER, profile.get().getProfileId());
+                container.set(key, PersistentDataType.INTEGER, profile.getProfileId());
                 state.getTileState().update();
 
                 player.sendMessage(ChatColor.GREEN + "Profile updated to " + name);
