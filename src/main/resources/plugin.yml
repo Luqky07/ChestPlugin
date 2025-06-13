@@ -1,0 +1,11 @@
+main: pch.luqky.ChestPlugin
+version: 1.0.0
+name: ChestPlugin
+author: Luqky
+api-version: 1.21
+
+commands:
+  chest:
+    description: Interact with chests security
+    usage: /chest <subcomando>
+    aliases: [ch]
