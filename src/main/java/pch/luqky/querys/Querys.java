@@ -1,6 +1,5 @@
 package pch.luqky.querys;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,13 +10,14 @@ import java.util.List;
 import org.bukkit.Bukkit;
 
 import net.md_5.bungee.api.ChatColor;
+import pch.luqky.connection.DatabaseConnection;
 import pch.luqky.models.SecureProfile;
 
 public class Querys {
     //Database connection
-    private Connection connection;
+    private DatabaseConnection connection;
     
-    public Querys(Connection connection) {
+    public Querys(DatabaseConnection connection) {
         this.connection = connection;
     }
 
@@ -41,7 +41,7 @@ public class Querys {
             )
         """;
 
-        try(Statement stmt = this.connection.createStatement()){
+        try(Statement stmt = this.connection.getConnection().createStatement()){
             stmt.executeUpdate(secure_profile);
             stmt.executeUpdate(secure_profile_member);
         }catch(SQLException e){
@@ -59,11 +59,11 @@ public class Querys {
         //Result list
         List<SecureProfile> profiles = new ArrayList<SecureProfile>();
         
-        try(Statement stmt = this.connection.createStatement()){
+        try(Statement stmt = this.connection.getConnection().createStatement()){
             //Get all profiles
             ResultSet profilesRes = stmt.executeQuery(profilesQuery);
             //Prepared statement to get all members of a profile
-            try(PreparedStatement mStatement = this.connection.prepareStatement(membersQuery)){
+            try(PreparedStatement mStatement = this.connection.getConnection().prepareStatement(membersQuery)){
                 //Iterate over all profiles
                 while(profilesRes.next()){
                     //Get profile base data
@@ -97,7 +97,7 @@ public class Querys {
 
     public boolean addSecureProfile(String name, String ownerName, boolean isDefault){
         String addProfileQuery = "INSERT INTO SECURE_PROFILES (NAME, OWNER_NAME, IS_DEFAULT) VALUES (?, ?, ?)";
-        try(PreparedStatement stmt = this.connection.prepareStatement(addProfileQuery)){
+        try(PreparedStatement stmt = this.connection.getConnection().prepareStatement(addProfileQuery)){
             stmt.setString(1, name);
             stmt.setString(2, ownerName);
             stmt.setBoolean(3, isDefault);
@@ -112,7 +112,7 @@ public class Querys {
 
     public boolean addSecureProfileMember(int profileId, String memberName){
         String addProfileMemberQuery = "INSERT INTO SECURE_PROFILE_MEMBER (PROFILE_ID, MEMBER_NAME) VALUES (?, ?)";
-        try(PreparedStatement stmt = this.connection.prepareStatement(addProfileMemberQuery)){
+        try(PreparedStatement stmt = this.connection.getConnection().prepareStatement(addProfileMemberQuery)){
             stmt.setInt(1, profileId);
             stmt.setString(2, memberName);
             stmt.executeUpdate();
@@ -126,7 +126,7 @@ public class Querys {
 
     public boolean removeSecureProfile(String ownerName, int profileId){
         String removeProfileQuery = "DELETE FROM SECURE_PROFILES WHERE OWNER_NAME = ? AND PROFILE_ID = ?";
-        try(PreparedStatement stmt = this.connection.prepareStatement(removeProfileQuery)){
+        try(PreparedStatement stmt = this.connection.getConnection().prepareStatement(removeProfileQuery)){
             stmt.setString(1, ownerName);
             stmt.setInt(2, profileId);
             stmt.executeUpdate();
@@ -139,7 +139,7 @@ public class Querys {
 
     public boolean removeSecureProfileMember(int profileId, String memberName){
         String removeProfileMemberQuery = "DELETE FROM SECURE_PROFILE_MEMBER WHERE PROFILE_ID = ? AND MEMBER_NAME = ?";
-        try(PreparedStatement stmt = this.connection.prepareStatement(removeProfileMemberQuery)){
+        try(PreparedStatement stmt = this.connection.getConnection().prepareStatement(removeProfileMemberQuery)){
             stmt.setInt(1, profileId);
             stmt.setString(2, memberName);
             stmt.executeUpdate();
@@ -154,7 +154,7 @@ public class Querys {
         String setDefaultProfileQuery = "UPDATE SECURE_PROFILES SET IS_DEFAULT = 1 WHERE OWNER_NAME = ? AND PROFILE_ID = ?";
         String setUndefaultProfileQuery = "UPDATE SECURE_PROFILES SET IS_DEFAULT = 0 WHERE OWNER_NAME = ?";
         
-        try(PreparedStatement stmt = this.connection.prepareStatement(setUndefaultProfileQuery)){
+        try(PreparedStatement stmt = this.connection.getConnection().prepareStatement(setUndefaultProfileQuery)){
             stmt.setString(1, ownerName);
             stmt.executeUpdate();
         }catch(SQLException e){
@@ -162,7 +162,7 @@ public class Querys {
             return false;
         }
         
-        try(PreparedStatement stmt = this.connection.prepareStatement(setDefaultProfileQuery)){
+        try(PreparedStatement stmt = this.connection.getConnection().prepareStatement(setDefaultProfileQuery)){
             stmt.setString(1, ownerName);
             stmt.setInt(2, profileId);
             stmt.executeUpdate();

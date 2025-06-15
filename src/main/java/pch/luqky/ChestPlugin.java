@@ -27,7 +27,7 @@ public class ChestPlugin extends JavaPlugin {
         DatabaseConnection dbConnection = new DatabaseConnection(dbConfig.getDatabaseInfo());
 
         //Create class to manage database queries
-        querys = new Querys(dbConnection.getConnection());
+        querys = new Querys(dbConnection);
 
         //Validate basic tables
         querys.validateTables();

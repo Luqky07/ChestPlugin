@@ -14,7 +14,21 @@ public class DatabaseConnection {
     private DatabaseInfo databaseInfo;
     public DatabaseConnection(DatabaseInfo databaseInfo) {
         this.databaseInfo = databaseInfo;
+        connect();
+    }
 
+    public Connection getConnection() {
+        try{
+            if (connection == null || connection.isClosed() || !connection.isValid(2)){
+                connect();
+            }
+            return connection;
+        }catch(SQLException e){
+            return null;
+        }
+    }
+
+    private void connect() {
         try{
             //Try to connect to database
             synchronized(this){
@@ -25,7 +39,7 @@ public class DatabaseConnection {
 
                 Class.forName("com.mysql.jdbc.Driver");
                 connection = DriverManager.getConnection(this.databaseInfo.getConnectionString(), this.databaseInfo.getUser(), this.databaseInfo.getPassword());
-            
+                
                 Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[ChestPlugin] Database connection established");
             }
         } catch(SQLException e){
@@ -33,9 +47,5 @@ public class DatabaseConnection {
         } catch (ClassNotFoundException e) {
             
         }
-    }
-
-    public Connection getConnection() {
-        return connection;
     }
 }
